@@ -1,7 +1,7 @@
 # Imagen base
 FROM golang:1.24
 
-# Directorio de trabajo
+# Directorio de trabaj
 WORKDIR /app
 
 # Copiar los archivos del proyecto
