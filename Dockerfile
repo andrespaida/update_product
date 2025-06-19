@@ -10,7 +10,7 @@ COPY . .
 # Descargar dependencias
 RUN go mod download
 
-# Compilar el binario
+# Compilar el binari
 RUN go build -o update_product
 
 # Exponer el puerto
