@@ -1,0 +1,61 @@
+name: Deploy update-product
+
+on:
+  push:
+    branches:
+      - qa
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > key.pem
+          chmod 400 key.pem
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+
+            echo "📦 Updating Docker environment for update-product..."
+
+            # Instalar Docker si no está instalado
+            if ! command -v docker &> /dev/null
+            then
+              echo "🛠 Installing Docker..."
+              sudo apt update
+              sudo apt install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+            fi
+
+            # Detener y eliminar contenedor anterior
+            sudo docker stop update-product || true
+            sudo docker rm update-product || true
+
+            # Clonar y compilar el proyecto más reciente
+            rm -rf ~/update-product
+            git clone https://github.com/andrespaida/update_product.git ~/update-product
+            cd ~/update-product
+            git checkout qa
+
+            # Reconstruir imagen con código actualizado
+            sudo docker build -t update-product .
+
+            # Ejecutar contenedor con reinicio automático
+            sudo docker run -d --name update-product -p 4003:4003 \
+              --restart=always \
+              -e MONGODB_URI=mongodb://13.222.75.144:27017 \
+              -e DB_NAME=toyshop_db \
+              -e PORT=4003 \
+              update-product
+
+            echo "✅ update-product deployed successfully"
+            sudo docker ps -a
+          EOF
