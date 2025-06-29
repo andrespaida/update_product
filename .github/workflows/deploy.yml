@@ -25,7 +25,6 @@ jobs:
 
             echo "📦 Updating Docker environment for update-product..."
 
-            # Instalar Docker si no está instalado
             if ! command -v docker &> /dev/null
             then
               echo "🛠 Installing Docker..."
@@ -35,20 +34,16 @@ jobs:
               sudo systemctl enable docker
             fi
 
-            # Detener y eliminar contenedor anterior
             sudo docker stop update-product || true
             sudo docker rm update-product || true
 
-            # Clonar y compilar el proyecto más reciente
             rm -rf ~/update-product
             git clone https://github.com/andrespaida/update_product.git ~/update-product
             cd ~/update-product
             git checkout qa
 
-            # Reconstruir imagen con código actualizado
             sudo docker build -t update-product .
 
-            # Ejecutar contenedor con reinicio automático
             sudo docker run -d --name update-product -p 4003:4003 \
               --restart=always \
               -e MONGODB_URI=mongodb://13.222.75.144:27017 \

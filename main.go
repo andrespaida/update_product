@@ -21,7 +21,6 @@ func main() {
 
 	router := gin.Default()
 
-	// Configuración de CORS
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"PUT", "GET", "POST", "DELETE", "OPTIONS"},
@@ -29,7 +28,6 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Ruta para actualizar producto
 	router.PUT("/products/:id", handlers.UpdateProduct)
 
 	port := os.Getenv("PORT")
