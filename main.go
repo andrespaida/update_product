@@ -6,6 +6,7 @@ import (
 	"update_product/database"
 	"update_product/handlers"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,12 +21,18 @@ func main() {
 
 	router := gin.Default()
 
-	// Ruta para actualizar producto
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"PUT", "GET", "POST", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: true,
+	}))
+
 	router.PUT("/products/:id", handlers.UpdateProduct)
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "4002"
+		port = "4003"
 	}
 
 	log.Println("🚀 Server running on port", port)
